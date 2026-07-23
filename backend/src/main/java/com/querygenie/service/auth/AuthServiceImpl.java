@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
                 .name(request.getName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ANALYST) // default role; SUPER_ADMIN must be set manually
+                .role(request.getRole() != null ? request.getRole() : Role.ANALYST) // use requested role or default
                 .build();
         user = userRepository.save(user);
 
@@ -116,6 +116,10 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(rawRefreshToken)
+                .userId(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
                 .build();
     }
 

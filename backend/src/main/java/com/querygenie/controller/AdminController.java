@@ -36,13 +36,36 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getUsage() {
         long total = queryLogRepository.count();
         long failures = queryLogRepository.countFailuresSince(Instant.now().minus(30, ChronoUnit.DAYS));
-        double successRate = total > 0 ? ((double)(total - failures) / total) * 100 : 0.0;
+        double successRate = total > 0 ? ((double)(total - failures) / total) * 100.0 : 100.0;
+        Double avgLatency = queryLogRepository.findAvgExecutionTimeMs();
+        
+        var dsCounts = queryLogRepository.countQueriesByDataSource().stream()
+                .map(row -> Map.of(
+                        "dataSourceId", row[0],
+                        "dataSourceName", row[1] != null ? row[1] : "Unknown",
+                        "queryCount", row[2]
+                ))
+                .toList();
 
         return ResponseEntity.ok(ApiResponse.success(Map.of(
                 "totalQueries", total,
-                "failuresLast30Days", failures,
-                "successRatePercent", Math.round(successRate * 100.0) / 100.0
+                "successRate", Math.round(successRate * 10.0) / 10.0,
+                "avgLatencyMs", Math.round((avgLatency != null ? avgLatency : 0.0) * 10.0) / 10.0,
+                "byDataSource", dsCounts
         )));
+    }
+
+    @GetMapping("/analytics/top-questions")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'DATA_SOURCE_ADMIN')")
+    @Operation(summary = "Get top asked questions")
+    public ResponseEntity<ApiResponse<java.util.List<Map<String, Object>>>> getTopQuestions() {
+        var topQuestions = queryLogRepository.findTopQuestions(org.springframework.data.domain.PageRequest.of(0, 10)).stream()
+                .map(row -> Map.of(
+                        "question", row[0] != null ? row[0] : "",
+                        "count", row[1]
+                ))
+                .toList();
+        return ResponseEntity.ok(ApiResponse.success(topQuestions));
     }
 
     @GetMapping("/users")

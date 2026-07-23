@@ -79,9 +79,19 @@ public class SchemaIntrospectionServiceImpl implements SchemaIntrospectionServic
             return cached;
         }
         // Fall back to DB
-        return dataSourceRepository.findById(dataSourceId)
-                .map(DataSource::getSchemaCache)
-                .orElseThrow(() -> new SchemaIntrospectionException("No schema cache found for dataSource: " + dataSourceId));
+        DataSource ds = dataSourceRepository.findById(dataSourceId)
+                .orElseThrow(() -> new SchemaIntrospectionException("DataSource not found: " + dataSourceId));
+                
+        String dbCached = ds.getSchemaCache();
+        if (StringUtils.hasText(dbCached)) {
+            // Restore to Redis for next time
+            redisTemplate.opsForValue().set(REDIS_KEY_PREFIX + dataSourceId, dbCached, REDIS_TTL);
+            return dbCached;
+        }
+        
+        // If it's not cached at all, introspect and cache it now
+        introspectAndCache(ds);
+        return ds.getSchemaCache();
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────

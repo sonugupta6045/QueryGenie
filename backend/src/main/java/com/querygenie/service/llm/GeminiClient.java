@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.Map;
 public class GeminiClient {
 
     private static final String GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
-    private static final Duration TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration TIMEOUT = Duration.ofSeconds(15);
 
     private final WebClient webClient;
     private final String apiKey;
@@ -37,7 +38,7 @@ public class GeminiClient {
     /**
      * Sends a single-turn text prompt to Gemini and returns the raw text response.
      *
-     * @param model  e.g. "gemini-1.5-flash"
+     * @param model  e.g. "gemini-3.5-flash"
      * @param prompt the full prompt string
      * @return raw text content from the first candidate
      */
@@ -57,6 +58,9 @@ public class GeminiClient {
                             clientResponse -> clientResponse.bodyToMono(String.class)
                                     .flatMap(body -> Mono.error(new LlmApiException("Gemini API error: " + body))))
                     .bodyToMono(Map.class)
+                    .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
+                            .filter(throwable -> throwable instanceof LlmApiException && 
+                                    throwable.getMessage().contains("503")))
                     .timeout(TIMEOUT)
                     .block();
 

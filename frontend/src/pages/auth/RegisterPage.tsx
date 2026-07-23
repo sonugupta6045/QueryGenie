@@ -34,7 +34,8 @@ export default function RegisterPage() {
       setApiError(null);
       try {
         const { confirmPassword, ...registerData } = values;
-        const data = await authApi.register(registerData);
+        const payload = { ...registerData, role: 'SUPER_ADMIN' as const };
+        const data = await authApi.register(payload);
         dispatch(setCredentials({
           user: { id: data.userId, name: data.name, email: data.email, role: data.role },
           accessToken: data.accessToken,

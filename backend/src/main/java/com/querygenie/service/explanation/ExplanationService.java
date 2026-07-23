@@ -1,5 +1,6 @@
 package com.querygenie.service.explanation;
 
+import com.querygenie.exception.LlmApiException;
 import com.querygenie.service.llm.GeminiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,8 @@ import java.util.List;
 @Slf4j
 public class ExplanationService {
 
-    private static final String GEMINI_MODEL = "gemini-1.5-flash";
+    private static final String GEMINI_MODEL = "gemini-flash-latest";
+    private static final String FALLBACK_MODEL = "gemini-3.1-flash-lite";
     private static final int MAX_SAMPLE_ROWS = 3;
 
     private final GeminiClient geminiClient;
@@ -44,7 +46,14 @@ public class ExplanationService {
                     Be concise. Do not include SQL or technical terms.
                     """.formatted(question, rowCount, sample);
 
-            return geminiClient.generateContent(GEMINI_MODEL, prompt).trim();
+            String rawResponse;
+            try {
+                rawResponse = geminiClient.generateContent(GEMINI_MODEL, prompt);
+            } catch (LlmApiException e) {
+                log.warn("Primary model {} failed: {}. Falling back to {}", GEMINI_MODEL, e.getMessage(), FALLBACK_MODEL);
+                rawResponse = geminiClient.generateContent(FALLBACK_MODEL, prompt);
+            }
+            return rawResponse.trim();
         } catch (Exception e) {
             log.warn("Explanation generation failed (non-fatal): {}", e.getMessage());
             return "Explanation unavailable.";

@@ -8,7 +8,7 @@ spring:
     name: querygenie-backend
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:querygenie_db}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:querygenie_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -49,10 +49,10 @@ jwt:
 # AES-256-GCM key for encrypting tenant DB credentials
 # Generate a fresh 32-byte key: openssl rand -base64 32
 encryption:
-  key: ${ENCRYPTION_KEY:dGhpcyBpcyBhIDMyIGJ5dGUgc2FtcGxlIGtleSEhIQ==}
+  key: ${ENCRYPTION_KEY:dGhpcyBpcyBhIDMyIGJ5dGUgc2FtcGxlIGtleSEhISE=}
 
 gemini:
-  api-key: ${GEMINI_API_KEY:your-gemini-api-key-here}
+  api-key: ${GEMINI_API_KEY:AQ.Ab8RN6KsyUlqpEJrNd-5D2Rgj3WzFK6cNg-CmWNXGYGbStIbog}
 
 # SpringDoc / Swagger UI
 springdoc:

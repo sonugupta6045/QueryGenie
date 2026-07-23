@@ -21,7 +21,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SqlGenerationService {
 
-    private static final String GEMINI_MODEL = "gemini-1.5-flash";
+    private static final String GEMINI_MODEL = "gemini-flash-latest";
+    private static final String FALLBACK_MODEL = "gemini-3.1-flash-lite";
     private static final String CLARIFICATION_PREFIX = "CLARIFICATION:";
 
     private final GeminiClient geminiClient;
@@ -46,8 +47,25 @@ public class SqlGenerationService {
         String prompt = promptBuilderService.buildSqlGenerationPrompt(schemaJson, question);
         log.debug("Calling Gemini for dataSourceId={}, question length={}", dataSourceId, question.length());
 
-        String rawResponse = geminiClient.generateContent(GEMINI_MODEL, prompt);
+        String rawResponse;
+        try {
+            rawResponse = geminiClient.generateContent(GEMINI_MODEL, prompt);
+        } catch (LlmApiException e) {
+            log.warn("Primary model {} failed: {}. Falling back to {}", GEMINI_MODEL, e.getMessage(), FALLBACK_MODEL);
+            rawResponse = geminiClient.generateContent(FALLBACK_MODEL, prompt);
+        }
         String trimmed = rawResponse == null ? "" : rawResponse.trim();
+
+        // Strip markdown code fences if the LLM ignores the instruction not to use them
+        if (trimmed.toLowerCase().startsWith("```sql")) {
+            trimmed = trimmed.substring(6);
+        } else if (trimmed.startsWith("```")) {
+            trimmed = trimmed.substring(3);
+        }
+        if (trimmed.endsWith("```")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 3);
+        }
+        trimmed = trimmed.trim();
 
         if (trimmed.toUpperCase().startsWith(CLARIFICATION_PREFIX)) {
             String message = trimmed.substring(CLARIFICATION_PREFIX.length()).trim();

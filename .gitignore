@@ -13,3 +13,19 @@
 
 # Mac/Windows system files
 Thumbs.db
+
+# Maven / Java Build Outputs
+target/
+**/target/
+*.class
+*.jar
+*.war
+*.log
+temp_log.txt
+
+# Node / Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+

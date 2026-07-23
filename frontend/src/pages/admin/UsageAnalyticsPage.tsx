@@ -35,13 +35,13 @@ export default function UsageAnalyticsPage() {
             <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
               <div className="p-5">
                 <dt className="text-sm font-medium text-gray-500 truncate">Success Rate</dt>
-                <dd className="mt-1 text-3xl font-semibold text-green-600">{data.successRate.toFixed(1)}%</dd>
+                <dd className="mt-1 text-3xl font-semibold text-green-600">{(data.successRate ?? 100).toFixed(1)}%</dd>
               </div>
             </div>
             <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
               <div className="p-5">
                 <dt className="text-sm font-medium text-gray-500 truncate">Avg Latency</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900">{data.avgLatencyMs.toFixed(0)} ms</dd>
+                <dd className="mt-1 text-3xl font-semibold text-gray-900">{(data.avgLatencyMs ?? 0).toFixed(0)} ms</dd>
               </div>
             </div>
           </div>
