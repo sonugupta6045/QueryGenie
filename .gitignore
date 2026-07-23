@@ -1,0 +1,15 @@
+# General Environment Variables
+.env
+.env.*
+!.env.example
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Mac/Windows system files
+Thumbs.db
