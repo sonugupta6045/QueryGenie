@@ -50,7 +50,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         user = userRepository.save(user);
 
-        return buildAuthResponse(user);
+        return buildAuthResponse(user, java.util.UUID.randomUUID().toString());
     }
 
     @Override
@@ -63,16 +63,28 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Invalid credentials");
         }
 
-        return buildAuthResponse(user);
+        return buildAuthResponse(user, java.util.UUID.randomUUID().toString());
     }
 
     @Override
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request) {
+        if (request == null || request.getRefreshToken() == null || request.getRefreshToken().isBlank()) {
+            throw new UnauthorizedException("Refresh token is missing");
+        }
+
         String tokenHash = hash(request.getRefreshToken());
 
-        RefreshToken stored = refreshTokenRepository.findByTokenHashAndRevokedFalse(tokenHash)
-                .orElseThrow(() -> new UnauthorizedException("Refresh token is invalid or revoked"));
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(() -> new UnauthorizedException("Refresh token is invalid"));
+
+        if (stored.isRevoked()) {
+            // Reuse detection: The presented token is already revoked/rotated.
+            // This is a compromise signal. Revoke the entire family immediately.
+            log.warn("Token reuse detected for familyId: {}", stored.getFamilyId());
+            refreshTokenRepository.revokeAllByFamilyId(stored.getFamilyId());
+            throw new UnauthorizedException("Refresh token reuse detected. Session revoked.");
+        }
 
         if (stored.getExpiresAt().isBefore(Instant.now())) {
             stored.setRevoked(true);
@@ -80,27 +92,30 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Refresh token has expired");
         }
 
-        // Rotate: revoke old token, issue new pair
+        // Rotate: revoke old token (mark as rotated), issue new pair
         stored.setRevoked(true);
+        stored.setRotatedAt(Instant.now());
         refreshTokenRepository.save(stored);
 
-        return buildAuthResponse(stored.getUser());
+        return buildAuthResponse(stored.getUser(), stored.getFamilyId());
     }
 
     @Override
     @Transactional
     public void logout(String rawRefreshToken) {
+        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
+            return; // Nothing to revoke
+        }
         String tokenHash = hash(rawRefreshToken);
-        refreshTokenRepository.findByTokenHashAndRevokedFalse(tokenHash)
+        refreshTokenRepository.findByTokenHash(tokenHash)
                 .ifPresent(token -> {
-                    token.setRevoked(true);
-                    refreshTokenRepository.save(token);
+                    refreshTokenRepository.revokeAllByFamilyId(token.getFamilyId());
                 });
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────
 
-    private AuthResponse buildAuthResponse(User user) {
+    private AuthResponse buildAuthResponse(User user, String familyId) {
         String accessToken = jwtTokenProvider.generateAccessToken(user);
         String rawRefreshToken = jwtTokenProvider.generateRefreshToken();
 
@@ -108,6 +123,7 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .tokenHash(hash(rawRefreshToken))
+                .familyId(familyId)
                 .expiresAt(Instant.now().plusMillis(jwtTokenProvider.getRefreshTokenExpiryMs()))
                 .revoked(false)
                 .build();
@@ -115,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(rawRefreshToken)
+                .refreshToken(rawRefreshToken) // @JsonIgnore prevents this from being sent in response body
                 .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())

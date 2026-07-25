@@ -9,7 +9,7 @@ export interface User {
 
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string; // No longer returned by backend (HttpOnly cookie)
   tokenType: string;
   userId: number;
   name: string;

@@ -26,4 +26,9 @@ public interface DataSourceService {
      * @return summary: tableCount, columnCount, cachedAt
      */
     Map<String, Object> refreshSchema(Long id, Long requestingUserId);
+
+    /**
+     * Retrieves the cached schema JSON string for the given data source.
+     */
+    String getSchema(Long id, Long requestingUserId);
 }

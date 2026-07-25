@@ -38,7 +38,7 @@ class SqlGenerationServiceTest {
 
         when(schemaIntrospectionService.getCachedSchema(dataSourceId)).thenReturn(schemaJson);
         when(promptBuilderService.buildSqlGenerationPrompt(schemaJson, question)).thenReturn(prompt);
-        when(geminiClient.generateContent(eq("gemini-1.5-flash"), eq(prompt))).thenReturn(generatedSql);
+        when(geminiClient.generateContent(eq("gemini-flash-latest"), eq(prompt))).thenReturn(generatedSql);
 
         SqlGenerationService.SqlGenerationResult result = sqlGenerationService.generate(dataSourceId, question);
 
@@ -57,7 +57,7 @@ class SqlGenerationServiceTest {
 
         when(schemaIntrospectionService.getCachedSchema(dataSourceId)).thenReturn(schemaJson);
         when(promptBuilderService.buildSqlGenerationPrompt(schemaJson, question)).thenReturn(prompt);
-        when(geminiClient.generateContent(eq("gemini-1.5-flash"), eq(prompt))).thenReturn(clarificationRaw);
+        when(geminiClient.generateContent(eq("gemini-flash-latest"), eq(prompt))).thenReturn(clarificationRaw);
 
         SqlGenerationService.SqlGenerationResult result = sqlGenerationService.generate(dataSourceId, question);
 

@@ -10,5 +10,6 @@ public interface QueryLogMapper {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "dataSourceId", source = "dataSource.id")
+    @Mapping(target = "dataSourceName", source = "dataSource.name")
     QueryLogResponse toResponse(QueryLog queryLog);
 }

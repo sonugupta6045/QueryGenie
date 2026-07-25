@@ -41,9 +41,9 @@ function HistoryItem({ log }: { log: QueryLogResponse }) {
             "{log.questionText}"
           </h3>
           <div className="mt-1 text-xs text-gray-500 flex items-center space-x-4">
-            <span className="flex items-center">
+            <span className="flex items-center text-primary-main font-medium bg-primary-main/10 px-2 py-0.5 rounded">
               <Database size={12} className="mr-1" /> 
-              DS ID: {log.dataSourceId}
+              {log.dataSourceName || (log.dataSourceId ? `DS ID: ${log.dataSourceId}` : 'Unknown DB')}
             </span>
             {log.executionTimeMs && (
               <span className="flex items-center">

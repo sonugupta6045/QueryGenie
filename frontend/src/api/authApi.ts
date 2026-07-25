@@ -13,12 +13,14 @@ export const authApi = {
     return res.data.data;
   },
 
-  refresh: async (request: RefreshTokenRequest): Promise<AuthResponse> => {
-    const res = await axiosClient.post<ApiResponse<AuthResponse>>('/auth/refresh', request);
+  refresh: async (): Promise<AuthResponse> => {
+    // refresh token is now sent automatically via HttpOnly cookie
+    const res = await axiosClient.post<ApiResponse<AuthResponse>>('/auth/refresh');
     return res.data.data;
   },
 
-  logout: async (request: RefreshTokenRequest): Promise<void> => {
-    await axiosClient.post('/auth/logout', request);
+  logout: async (): Promise<void> => {
+    // logout uses the HttpOnly cookie
+    await axiosClient.post('/auth/logout');
   },
 };

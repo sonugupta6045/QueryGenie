@@ -102,15 +102,28 @@ public class SchemaIntrospectionServiceImpl implements SchemaIntrospectionServic
         try (Connection conn = tenantDs.getConnection()) {
             DatabaseMetaData meta = conn.getMetaData();
 
-            // List all user-defined tables
-            try (ResultSet rs = meta.getTables(null, "public", "%", new String[]{"TABLE"})) {
+            // List all user-defined tables across all non-system schemas
+            try (ResultSet rs = meta.getTables(null, "%", "%", new String[]{"TABLE"})) {
                 while (rs.next()) {
+                    String tableSchema = rs.getString("TABLE_SCHEM");
                     String tableName = rs.getString("TABLE_NAME");
-                    List<Map<String, String>> columns = readColumns(meta, tableName);
-                    List<Map<String, String>> fks = readForeignKeys(meta, tableName);
+
+                    // Filter out PostgreSQL internal system schemas
+                    if (isSystemSchema(tableSchema)) {
+                        continue;
+                    }
+
+                    String qualifiedName = "public".equalsIgnoreCase(tableSchema)
+                            ? tableName
+                            : tableSchema + "." + tableName;
+
+                    List<Map<String, String>> columns = readColumns(meta, tableSchema, tableName);
+                    List<Map<String, String>> fks = readForeignKeys(meta, tableSchema, tableName);
 
                     Map<String, Object> table = new LinkedHashMap<>();
-                    table.put("name", tableName);
+                    table.put("name", qualifiedName);
+                    table.put("schema", tableSchema);
+                    table.put("rawName", tableName);
                     table.put("columns", columns);
                     table.put("foreignKeys", fks);
                     tables.add(table);
@@ -121,9 +134,18 @@ public class SchemaIntrospectionServiceImpl implements SchemaIntrospectionServic
         return Map.of("tables", tables);
     }
 
-    private List<Map<String, String>> readColumns(DatabaseMetaData meta, String tableName) throws SQLException {
+    private boolean isSystemSchema(String schemaName) {
+        if (schemaName == null) return false;
+        String lower = schemaName.toLowerCase();
+        return lower.equals("information_schema") ||
+               lower.equals("pg_catalog") ||
+               lower.equals("pg_toast") ||
+               lower.startsWith("pg_temp");
+    }
+
+    private List<Map<String, String>> readColumns(DatabaseMetaData meta, String schemaName, String tableName) throws SQLException {
         List<Map<String, String>> columns = new ArrayList<>();
-        try (ResultSet rs = meta.getColumns(null, "public", tableName, "%")) {
+        try (ResultSet rs = meta.getColumns(null, schemaName, tableName, "%")) {
             while (rs.next()) {
                 Map<String, String> col = new LinkedHashMap<>();
                 col.put("name", rs.getString("COLUMN_NAME"));
@@ -134,9 +156,9 @@ public class SchemaIntrospectionServiceImpl implements SchemaIntrospectionServic
         return columns;
     }
 
-    private List<Map<String, String>> readForeignKeys(DatabaseMetaData meta, String tableName) throws SQLException {
+    private List<Map<String, String>> readForeignKeys(DatabaseMetaData meta, String schemaName, String tableName) throws SQLException {
         List<Map<String, String>> fks = new ArrayList<>();
-        try (ResultSet rs = meta.getImportedKeys(null, "public", tableName)) {
+        try (ResultSet rs = meta.getImportedKeys(null, schemaName, tableName)) {
             while (rs.next()) {
                 Map<String, String> fk = new LinkedHashMap<>();
                 fk.put("fromColumn", rs.getString("FKCOLUMN_NAME"));

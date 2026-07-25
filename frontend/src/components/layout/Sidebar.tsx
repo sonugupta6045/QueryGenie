@@ -14,14 +14,13 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      const rt = localStorage.getItem('refreshToken');
-      if (rt) {
-        await authApi.logout({ refreshToken: rt });
-      }
+      await authApi.logout();
     } catch (e) {
       console.error(e);
     } finally {
       dispatch(clearCredentials());
+      // Explicitly redirect to login since axiosClient won't do it automatically anymore
+      window.location.href = '/login';
     }
   };
 

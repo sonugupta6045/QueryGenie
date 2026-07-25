@@ -33,9 +33,26 @@ public class QueryLogController {
     @Operation(summary = "List query history for the authenticated user")
     public ResponseEntity<ApiResponse<Page<QueryLogResponse>>> list(
             @AuthenticationPrincipal SecurityUserDetails principal,
+            @RequestParam(required = false) Long dataSourceId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+
+        com.querygenie.enums.ExecutionStatus execStatus = null;
+        if (org.springframework.util.StringUtils.hasText(status)) {
+            try {
+                execStatus = com.querygenie.enums.ExecutionStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status enum string
+            }
+        }
+
+        String searchPattern = org.springframework.util.StringUtils.hasText(search)
+                ? "%" + search.trim().toLowerCase() + "%"
+                : null;
+
         Page<QueryLogResponse> page = queryLogRepository
-                .findByUserIdOrderByCreatedAtDesc(principal.getUser().getId(), pageable)
+                .findByUserIdAndFilters(principal.getUser().getId(), dataSourceId, execStatus, searchPattern, pageable)
                 .map(this::toResponse);
         return ResponseEntity.ok(ApiResponse.success(page));
     }
@@ -68,11 +85,17 @@ public class QueryLogController {
     private QueryLogResponse toResponse(QueryLog log) {
         QueryLogResponse r = new QueryLogResponse();
         r.setId(log.getId());
+        r.setUserId(log.getUser() != null ? log.getUser().getId() : null);
+        if (log.getDataSource() != null) {
+            r.setDataSourceId(log.getDataSource().getId());
+            r.setDataSourceName(log.getDataSource().getName());
+        }
         r.setQuestionText(log.getQuestionText());
         r.setGeneratedSql(log.getGeneratedSql());
         r.setExecutionStatus(log.getExecutionStatus().name());
         r.setExecutionTimeMs(log.getExecutionTimeMs());
-        r.setCreatedAt(log.getCreatedAt().toString());
+        r.setErrorMessage(log.getErrorMessage());
+        r.setCreatedAt(log.getCreatedAt() != null ? log.getCreatedAt().toString() : null);
         return r;
     }
 

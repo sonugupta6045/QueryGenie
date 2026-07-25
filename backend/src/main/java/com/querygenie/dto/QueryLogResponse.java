@@ -14,6 +14,7 @@ public class QueryLogResponse {
     private Long id;
     private Long userId;
     private Long dataSourceId;
+    private String dataSourceName;
     private String questionText;
     private String generatedSql;
     private String executionStatus;

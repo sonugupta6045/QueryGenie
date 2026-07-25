@@ -35,4 +35,10 @@ public class RefreshToken {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "family_id", nullable = false, length = 36)
+    private String familyId;
+
+    @Column(name = "rotated_at")
+    private Instant rotatedAt;
 }

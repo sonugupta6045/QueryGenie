@@ -111,6 +111,13 @@ public class DataSourceServiceImpl implements DataSourceService {
         return summary;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public String getSchema(Long id, Long requestingUserId) {
+        findAndAuthorize(id, requestingUserId);
+        return schemaIntrospectionService.getCachedSchema(id);
+    }
+
     // ── Private helpers ──────────────────────────────────────────────────────
 
     private DataSource findAndAuthorize(Long id, Long requestingUserId) {

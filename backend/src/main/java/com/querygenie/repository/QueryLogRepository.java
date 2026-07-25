@@ -17,6 +17,17 @@ public interface QueryLogRepository extends JpaRepository<QueryLog, Long> {
 
     Page<QueryLog> findByDataSourceIdOrderByCreatedAtDesc(Long dataSourceId, Pageable pageable);
 
+    @Query("SELECT q FROM QueryLog q WHERE q.user.id = :userId " +
+           "AND (:dataSourceId IS NULL OR q.dataSource.id = :dataSourceId) " +
+           "AND (:status IS NULL OR q.executionStatus = :status) " +
+           "AND (:search IS NULL OR LOWER(q.questionText) LIKE :search OR LOWER(q.generatedSql) LIKE :search)")
+    Page<QueryLog> findByUserIdAndFilters(
+            @Param("userId") Long userId,
+            @Param("dataSourceId") Long dataSourceId,
+            @Param("status") com.querygenie.enums.ExecutionStatus status,
+            @Param("search") String search,
+            Pageable pageable);
+
     @Query("SELECT COUNT(q) FROM QueryLog q WHERE q.executionStatus = 'FAILED' AND q.createdAt > :since")
     long countFailuresSince(@Param("since") Instant since);
 

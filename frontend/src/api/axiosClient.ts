@@ -1,17 +1,21 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { AuthResponse } from '../types/auth';
+import { store } from '../store/store';
+import { getNewToken } from './refreshQueue';
 
 const axiosClient = axios.create({
   baseURL: '/api/v1',
+  withCredentials: true, // Send HttpOnly cookies automatically
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to inject the token
+// Request interceptor to inject the token from Redux store
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('accessToken');
+    // We do NOT use localStorage anymore for accessToken
+    const state = store.getState();
+    const token = state.auth.accessToken;
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -20,46 +24,33 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle 401s and token refresh
+// Response interceptor to handle 401s and token refresh using single-flight queue
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+    // If 401 and it's not a retry request itself
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // Prevent infinite loops if the refresh endpoint itself returns 401
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
-      const refreshToken = localStorage.getItem('refreshToken');
 
-      if (refreshToken) {
-        try {
-          const res = await axios.post<{ success: boolean; data: AuthResponse }>('/api/v1/auth/refresh', {
-            refreshToken,
-          });
-
-          const { accessToken, refreshToken: newRefreshToken } = res.data.data;
-          
-          // Update local storage
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
-
-          // Update original request header and retry
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          }
-          return axiosClient(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, clear tokens and redirect to login
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
+      try {
+        const newAccessToken = await getNewToken();
+        
+        // Update original request header and retry
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
-      } else {
-        // No refresh token available
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        return axiosClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed (handled by getNewToken which dispatches setSessionExpired).
+        // Do NOT use window.location.href for hard redirect here.
+        return Promise.reject(refreshError);
       }
     }
     return Promise.reject(error);

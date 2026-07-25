@@ -38,7 +38,7 @@ export default function DataSourceSelector() {
         <option value="" disabled>Select Database</option>
         {dataSources.map((ds) => (
           <option key={ds.id} value={ds.id}>
-            {ds.name}
+            {ds.name} ({ds.dbName} @ {ds.dbHost}:{ds.dbPort})
           </option>
         ))}
       </select>

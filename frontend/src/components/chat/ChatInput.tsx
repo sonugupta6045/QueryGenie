@@ -1,14 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  initialText?: string;
 }
 
-export default function ChatInput({ onSend, disabled = false, placeholder = "Ask a question about your data..." }: ChatInputProps) {
-  const [input, setInput] = useState('');
+export default function ChatInput({ onSend, disabled = false, placeholder = "Ask a question about your data...", initialText }: ChatInputProps) {
+  const [input, setInput] = useState(() => {
+    return sessionStorage.getItem('chat_draft') || '';
+  });
+
+  // Save draft to sessionStorage whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem('chat_draft', input);
+  }, [input]);
+
+  // Append initialText if provided
+  useEffect(() => {
+    if (initialText) {
+      setInput(prev => (prev ? `${prev} ${initialText}` : initialText));
+    }
+  }, [initialText]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

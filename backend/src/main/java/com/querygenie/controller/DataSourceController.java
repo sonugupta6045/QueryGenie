@@ -89,4 +89,14 @@ public class DataSourceController {
         Map<String, Object> summary = dataSourceService.refreshSchema(id, principal.getUser().getId());
         return ResponseEntity.ok(ApiResponse.success(summary));
     }
+
+    @GetMapping("/{id}/schema")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get cached schema JSON for this data source")
+    public ResponseEntity<ApiResponse<String>> getSchema(
+            @PathVariable Long id,
+            @AuthenticationPrincipal SecurityUserDetails principal) {
+        String schemaJson = dataSourceService.getSchema(id, principal.getUser().getId());
+        return ResponseEntity.ok(ApiResponse.success(schemaJson));
+    }
 }

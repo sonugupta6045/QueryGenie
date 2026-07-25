@@ -36,4 +36,9 @@ export const dataSourceApi = {
     const res = await axiosClient.post<ApiResponse<SchemaRefreshSummary>>(`/data-sources/${id}/refresh-schema`);
     return res.data.data;
   },
+
+  getSchema: async (id: number): Promise<string> => {
+    const res = await axiosClient.get<ApiResponse<string>>(`/data-sources/${id}/schema`);
+    return res.data.data;
+  },
 };

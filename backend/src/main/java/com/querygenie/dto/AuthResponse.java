@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 public class AuthResponse {
 
     private String accessToken;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String refreshToken;
     @Builder.Default
     private String tokenType = "Bearer";

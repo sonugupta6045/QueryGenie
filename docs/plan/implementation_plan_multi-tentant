@@ -1,0 +1,61 @@
+# Implementation Plan: Multi-Schema & Tenant Database Introspection Support
+
+Enable QueryGenie to automatically discover, introspect, and generate SQL queries for multi-tenant PostgreSQL databases where tenant data resides in custom schemas (e.g., `tenant_3d570a1f0c20`, `tenant_6c91eb0453c0`) rather than solely the `public` schema.
+
+## Problem Diagnosis
+
+1. **Hardcoded `"public"` Schema Filter**: In [SchemaIntrospectionServiceImpl.java](file:///c:/Users/sonu%20gupta/OneDrive/Desktop/QueryGenie/backend/src/main/java/com/querygenie/service/schema/SchemaIntrospectionServiceImpl.java#L106), metadata queries hardcoded `"public"` as the schema parameter (`meta.getTables(null, "public", "%", ...)`).
+2. **Ignored Tenant Schemas**: In multi-tenant databases like `hr_qms`, tenant tables live inside isolated schemas (`tenant_3d570a1f0c20`, `tenant_6c91eb0453c0`, etc.). Because of the `"public"` filter, all 11+ tenant schemas were ignored during introspection, leaving the cached schema empty (`{"tables": []}`).
+3. **No-Data Answers**: Gemini received an empty schema prompt, leading it to conclude *"There are currently no active tenants registered in the system."*
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Key Architecture Updates:**
+> 1. **Multi-Schema Introspection**: Update `SchemaIntrospectionServiceImpl` to introspect **all non-system schemas** (excluding `pg_catalog`, `information_schema`, `pg_toast`).
+> 2. **Schema-Qualified Table Names**: Tables will be stored in the schema cache with their schema qualification (e.g., `tenant_3d570a1f0c20.tenants` or `{ schema: "tenant_3d570a1f0c20", name: "tenants" }`).
+> 3. **AI Prompt Schema Context**: The prompt builder will pass fully qualified table names to Gemini so it generates queries targeting the correct schema (e.g., `SELECT * FROM tenant_3d570a1f0c20.users`).
+
+---
+
+## Open Questions
+
+> [!NOTE]
+> None. System schemas to ignore: `pg_catalog`, `information_schema`, `pg_toast`, `pg_temp_%`.
+
+---
+
+## Proposed Changes
+
+### Backend Components
+
+#### [MODIFY] [SchemaIntrospectionServiceImpl.java](file:///c:/Users/sonu%20gupta/OneDrive/Desktop/QueryGenie/backend/src/main/java/com/querygenie/service/schema/SchemaIntrospectionServiceImpl.java)
+- Remove hardcoded `"public"` parameter from `getTables`, `getColumns`, and `getImportedKeys`.
+- Iterate through all user schemas (or query `meta.getTables(null, null, "%", new String[]{"TABLE"})`) and filter out system schemas.
+- Include `schema` field in table metadata object (`{ "schema": "tenant_3d570a1f0c20", "name": "users", ... }`) and construct qualified table name (`tenant_3d570a1f0c20.users`).
+
+#### [MODIFY] [PromptBuilderService.java](file:///c:/Users/sonu%20gupta/OneDrive/Desktop/QueryGenie/backend/src/main/java/com/querygenie/service/llm/PromptBuilderService.java)
+- Ensure prompt output formats schema tables with schema qualification so Gemini generates `schema_name.table_name` SQL queries.
+
+---
+
+### Frontend Components
+
+#### [MODIFY] [SchemaInspectorModal.tsx](file:///c:/Users/sonu%20gupta/OneDrive/Desktop/QueryGenie/frontend/src/components/chat/SchemaInspectorModal.tsx)
+- Display schema badge (`tenant_3d570a1...`) alongside table names in the Schema Inspector drawer.
+- Group tables by schema or display qualified names (`tenant_3d570a1f0c20.users`).
+
+---
+
+## Verification Plan
+
+### Automated Verification
+- Run `mvn test` in `backend` to ensure all unit tests pass with multi-schema changes.
+
+### Manual Verification
+1. Trigger **"Refresh Schema"** on `Tenant database` (`hr_qms`).
+2. Open **"Inspect Schema"** in Chat interface and verify that tables from all `tenant_*` schemas are visible.
+3. Ask: *"List all active tenants registered in the system."*
+4. Verify that Gemini generates a schema-qualified query (e.g., `SELECT * FROM tenant_...`) and returns actual rows.

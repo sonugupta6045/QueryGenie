@@ -31,9 +31,17 @@ export default function LoginPage() {
         dispatch(setCredentials({
           user: { id: data.userId, name: data.name, email: data.email, role: data.role },
           accessToken: data.accessToken,
-          refreshToken: data.refreshToken
         }));
-        navigate('/chat', { replace: true });
+        
+        // Broadcast that session was restored to other tabs
+        import('../../api/sessionSync').then(module => {
+            module.broadcastSessionRestored();
+        });
+
+        // Redirect to returnUrl if it exists, otherwise to /chat
+        const params = new URLSearchParams(window.location.search);
+        const returnUrl = params.get('returnUrl') || '/chat';
+        navigate(returnUrl, { replace: true });
       } catch (err: any) {
         setApiError(err.response?.data?.error || { code: 'UNKNOWN', message: 'Failed to login' });
       } finally {
