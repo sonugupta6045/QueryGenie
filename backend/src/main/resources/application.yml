@@ -8,9 +8,9 @@ spring:
     name: querygenie-backend
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://${DB_HOST:aws-0-ap-southeast-1.pooler.supabase.com}:${DB_PORT:5432}/${DB_NAME:postgres}${DB_PARAMS:?sslmode=require}}
-    username: ${DB_USERNAME:postgres.inqxpbdihtbgekvumbcg}
-    password: ${DB_PASSWORD:A10vwSbyFz8IRIJ4}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -29,11 +29,11 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:pleasant-roughy-172816.upstash.io}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:gQAAAAAAAqMQAAIgcDE0NzY0MTU1M2Y2OTU0MTAyODUwMTIyMTJkN2M1MmFlZg}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
       ssl:
-        enabled: ${REDIS_SSL:true}
+        enabled: ${REDIS_SSL}
 
   jackson:
     serialization:
@@ -44,17 +44,17 @@ spring:
       matching-strategy: ant_path_matcher
 
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  secret: ${JWT_SECRET}
   access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}    # 15 minutes
   refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000} # 7 days
 
 # AES-256-GCM key for encrypting tenant DB credentials
 # Generate a fresh 32-byte key: openssl rand -base64 32
 encryption:
-  key: ${ENCRYPTION_KEY:dGhpcyBpcyBhIDMyIGJ5dGUgc2FtcGxlIGtleSEhISE=}
+  key: ${ENCRYPTION_KEY}
 
 gemini:
-  api-key: ${GEMINI_API_KEY:AQ.Ab8RN6KsyUlqpEJrNd-5D2Rgj3WzFK6cNg-CmWNXGYGbStIbog}
+  api-key: ${GEMINI_API_KEY}
 
 # SpringDoc / Swagger UI
 springdoc:

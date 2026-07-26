@@ -3,7 +3,7 @@ import { store } from '../store/store';
 import { getNewToken } from './refreshQueue';
 
 const axiosClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
   withCredentials: true, // Send HttpOnly cookies automatically
   headers: {
     'Content-Type': 'application/json',
