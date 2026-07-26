@@ -32,28 +32,28 @@ export default function ResultTable({ columns, rows }: ResultTableProps) {
   };
 
   return (
-    <div className="overflow-x-auto border border-gray-200 rounded-lg mt-4 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto border border-border rounded-lg mt-4 bg-surface shadow-sm">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-surface-secondary">
           <tr>
             {columns.map((col, idx) => (
               <th 
                 key={idx} 
                 scope="col" 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider whitespace-nowrap"
               >
                 {col.name}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-surface divide-y divide-border">
           {rows.map((row, rowIdx) => (
-            <tr key={rowIdx} className="hover:bg-gray-50 transition-colors">
+            <tr key={rowIdx} className="hover:bg-surface-secondary/60 transition-colors">
               {row.map((cell, cellIdx) => (
                 <td 
                   key={cellIdx} 
-                  className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap"
+                  className="px-6 py-4 text-sm text-text-primary whitespace-nowrap"
                 >
                   {formatCell(cell, columns[cellIdx].type)}
                 </td>
@@ -63,7 +63,7 @@ export default function ResultTable({ columns, rows }: ResultTableProps) {
         </tbody>
       </table>
       
-      <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500 flex justify-between">
+      <div className="bg-surface-secondary px-6 py-3 border-t border-border text-xs text-text-secondary flex justify-between">
         <span>Showing {rows.length} rows</span>
         {/* Pagination could go here */}
       </div>

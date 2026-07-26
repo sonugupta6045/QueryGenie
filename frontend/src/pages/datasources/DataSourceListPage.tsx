@@ -12,14 +12,14 @@ export default function DataSourceListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Data Sources</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-extrabold text-text-primary tracking-tight">Data Sources</h1>
+          <p className="mt-1 text-sm text-text-secondary">
             Manage your connected databases for AI querying.
           </p>
         </div>
         <Link
           to="/data-sources/new"
-          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-main hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-main"
+          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg shadow-sm text-white bg-primary-main hover:bg-primary-dark transition-colors"
         >
           <Plus className="-ml-1 mr-2 h-5 w-5" />
           Add Data Source
@@ -33,10 +33,10 @@ export default function DataSourceListPage() {
       {isLoading ? (
         <PageSpinner />
       ) : data?.content.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-          <Database className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No data sources</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating a new connection.</p>
+        <div className="text-center py-12 bg-surface rounded-xl border border-border shadow-sm">
+          <Database className="mx-auto h-12 w-12 text-text-secondary" />
+          <h3 className="mt-2 text-sm font-medium text-text-primary">No data sources</h3>
+          <p className="mt-1 text-sm text-text-secondary">Get started by creating a new connection.</p>
           <div className="mt-6">
             <Link
               to="/data-sources/new"

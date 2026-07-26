@@ -15,8 +15,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-extrabold text-text-primary tracking-tight">Admin Dashboard</h1>
+        <p className="mt-1 text-sm text-text-secondary">
           Welcome back, {user?.name}. Manage QueryGenie system settings.
         </p>
       </div>
@@ -25,21 +25,21 @@ export default function AdminDashboardPage() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link key={card.name} to={card.href} className={`rounded-xl border p-6 flex flex-col hover:shadow-md transition-shadow ${card.color.split(' ')[0]} ${card.color.split(' ')[2]}`}>
+            <Link key={card.name} to={card.href} className={`rounded-xl border p-6 flex flex-col hover:shadow-md transition-all bg-surface border-border`}>
               <div className={`p-3 rounded-lg self-start ${card.color.split(' ')[0]} ${card.color.split(' ')[1]}`}>
                 <Icon size={24} />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">{card.name}</h3>
-              <p className="mt-2 text-sm text-gray-600 flex-1">{card.description}</p>
+              <h3 className="mt-4 text-lg font-bold text-text-primary">{card.name}</h3>
+              <p className="mt-2 text-sm text-text-secondary flex-1">{card.description}</p>
             </Link>
           );
         })}
       </div>
       
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-          <h3 className="text-base font-semibold text-gray-900 flex items-center">
-            <Settings size={18} className="mr-2 text-gray-500" />
+      <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="px-6 py-5 border-b border-border bg-surface-secondary flex items-center justify-between">
+          <h3 className="text-base font-semibold text-text-primary flex items-center">
+            <Settings size={18} className="mr-2 text-text-secondary" />
             System Status
           </h3>
         </div>

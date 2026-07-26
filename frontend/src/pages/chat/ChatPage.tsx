@@ -116,7 +116,7 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative">
+    <div className="flex flex-col h-full bg-surface rounded-2xl shadow-sm border border-border overflow-hidden relative transition-colors duration-200">
       {/* Sticky Active Database Banner */}
       <ActiveDatabaseBanner
         activeDataSource={activeDataSource}
@@ -133,7 +133,7 @@ export default function ChatPage() {
       />
       
       {/* Footer Chat Input */}
-      <div className="p-4 bg-white border-t border-gray-100 shrink-0">
+      <div className="p-4 bg-surface border-t border-border shrink-0 transition-colors duration-200">
         <div className="max-w-4xl mx-auto">
           <ChatInput 
             onSend={handleSend} 

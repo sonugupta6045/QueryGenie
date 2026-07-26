@@ -33,13 +33,13 @@ export default function MessageThread({ messages, onRerun, isRerunningId }: Mess
   return (
     <div className="flex-1 overflow-y-auto px-2 py-4 space-y-6">
       {messages.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center text-gray-500 pb-20">
-          <Bot size={48} className="text-gray-300 mb-4" />
-          <h2 className="text-xl font-medium text-gray-700">Welcome to QueryGenie</h2>
-          <p className="mt-2 text-sm max-w-md text-center">Ask me questions about your connected data source in plain English.</p>
+        <div className="h-full flex flex-col items-center justify-center text-text-secondary pb-20">
+          <Bot size={48} className="text-primary-main/60 mb-4" />
+          <h2 className="text-2xl font-extrabold text-text-primary tracking-tight">Welcome to QueryGenie</h2>
+          <p className="mt-2 text-sm max-w-md text-center text-text-secondary">Ask me questions about your connected data source in plain English.</p>
           <div className="mt-8 flex gap-2 flex-wrap justify-center max-w-2xl">
-            <span className="px-4 py-2 bg-white rounded-full text-sm border border-gray-200 shadow-sm cursor-pointer hover:border-primary-main">"Show me total revenue by month for this year"</span>
-            <span className="px-4 py-2 bg-white rounded-full text-sm border border-gray-200 shadow-sm cursor-pointer hover:border-primary-main">"What are our top 5 selling products?"</span>
+            <span className="px-4 py-2 bg-surface rounded-full text-sm border border-border shadow-sm cursor-pointer hover:border-primary-main hover:text-primary-main transition-colors font-medium text-text-primary">"Show me total revenue by month for this year"</span>
+            <span className="px-4 py-2 bg-surface rounded-full text-sm border border-border shadow-sm cursor-pointer hover:border-primary-main hover:text-primary-main transition-colors font-medium text-text-primary">"What are our top 5 selling products?"</span>
           </div>
         </div>
       ) : (
@@ -50,12 +50,12 @@ export default function MessageThread({ messages, onRerun, isRerunningId }: Mess
               {/* Avatar */}
               <div className="flex-shrink-0 mx-3 mt-1">
                 {msg.type === 'user' ? (
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User size={16} className="text-blue-600" />
+                  <div className="w-8 h-8 bg-primary-subtle text-primary-main rounded-full flex items-center justify-center font-bold border border-border">
+                    <User size={16} />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center border border-primary-200 bg-white">
-                    <Bot size={16} className="text-primary-main" />
+                  <div className="w-8 h-8 bg-surface rounded-full flex items-center justify-center border border-border text-primary-main">
+                    <Bot size={16} />
                   </div>
                 )}
               </div>
@@ -85,10 +85,7 @@ export default function MessageThread({ messages, onRerun, isRerunningId }: Mess
                           <SqlDisplayBox 
                             sql={msg.result.sql} 
                             onRerun={(editedSql) => {
-                              // We need the log ID to rerun. The result doesn't have it directly in Phase 2 spec.
-                              // Wait, Phase 2 spec actually says `POST /queries/{logId}/rerun`
-                              // For simplicity in the component, we pass the SQL up. The page handles it.
-                              onRerun(0, editedSql); // Hack for now, page needs to handle this properly
+                              onRerun(0, editedSql);
                             }}
                             isRerunning={isRerunningId !== null}
                           />
@@ -99,7 +96,7 @@ export default function MessageThread({ messages, onRerun, isRerunningId }: Mess
                           rows={msg.result.rows}
                         />
                         {msg.result.executionTimeMs && (
-                          <div className="text-right text-xs text-gray-400 mt-2">
+                          <div className="text-right text-xs text-text-secondary mt-2">
                             Executed in {msg.result.executionTimeMs}ms
                           </div>
                         )}

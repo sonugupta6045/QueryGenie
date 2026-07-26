@@ -33,7 +33,7 @@ export default function DataSourceSelector() {
       <select
         value={selectedDataSourceId || ''}
         onChange={(e) => dispatch(setSelectedDataSource(Number(e.target.value)))}
-        className="text-sm bg-white border border-gray-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary-main focus:border-transparent appearance-none"
+        className="text-sm font-medium text-text-primary bg-surface border border-border rounded-lg py-1.5 pl-3 pr-8 focus:outline-none focus:border-primary-main focus:ring-1 focus:ring-primary-main appearance-none shadow-sm transition-colors"
       >
         <option value="" disabled>Select Database</option>
         {dataSources.map((ds) => (

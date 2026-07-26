@@ -35,25 +35,25 @@ export default function SqlDisplayBox({ sql, onRerun, isRerunning = false }: Sql
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden my-4 bg-gray-50">
+    <div className="border border-border rounded-lg overflow-hidden my-4 bg-surface-secondary">
       <div 
-        className="flex items-center justify-between px-4 py-2 bg-gray-100 border-b border-gray-200 cursor-pointer"
+        className="flex items-center justify-between px-4 py-2 bg-surface border-b border-border cursor-pointer"
         onClick={() => !isEditing && setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Generated SQL</span>
+          <span className="text-xs font-semibold text-text-primary uppercase tracking-wider">Generated SQL</span>
           {!isEditing && (
-            isExpanded ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />
+            isExpanded ? <ChevronUp size={16} className="text-text-secondary" /> : <ChevronDown size={16} className="text-text-secondary" />
           )}
         </div>
         
         <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
           {isEditing ? (
             <>
-              <button onClick={handleCancel} className="text-xs flex items-center text-gray-600 hover:text-gray-900 px-2 py-1 bg-white border border-gray-300 rounded">
+              <button onClick={handleCancel} className="text-xs flex items-center text-text-primary hover:bg-surface-secondary px-2.5 py-1 bg-surface border border-border rounded transition-colors">
                 <X size={14} className="mr-1" /> Cancel
               </button>
-              <button onClick={handleSave} className="text-xs flex items-center text-white bg-primary-main hover:bg-primary-dark px-2 py-1 rounded">
+              <button onClick={handleSave} className="text-xs flex items-center text-white bg-primary-main hover:bg-primary-dark px-2.5 py-1 rounded transition-colors">
                 <Check size={14} className="mr-1" /> Save
               </button>
             </>
@@ -61,14 +61,14 @@ export default function SqlDisplayBox({ sql, onRerun, isRerunning = false }: Sql
             <>
               <button 
                 onClick={() => { setIsExpanded(true); setIsEditing(true); }} 
-                className="text-xs flex items-center text-gray-600 hover:text-gray-900 px-2 py-1 bg-white border border-gray-300 rounded"
+                className="text-xs flex items-center text-text-primary hover:bg-surface-secondary px-2.5 py-1 bg-surface border border-border rounded transition-colors"
               >
                 <Edit2 size={14} className="mr-1" /> Edit
               </button>
               <button 
                 onClick={() => onRerun(editedSql)}
                 disabled={isRerunning || editedSql === sql}
-                className="text-xs flex items-center text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:bg-green-600 px-2 py-1 rounded transition-colors"
+                className="text-xs flex items-center text-white bg-success hover:opacity-90 disabled:opacity-50 px-2.5 py-1 rounded transition-colors"
               >
                 <Play size={14} className="mr-1" /> Re-run
               </button>

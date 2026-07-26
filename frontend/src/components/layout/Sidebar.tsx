@@ -6,6 +6,7 @@ import { toggleSidebar } from '../../store/slices/uiSlice';
 import { useAuth } from '../../hooks/useAuth';
 import { authApi } from '../../api/authApi';
 import { clearCredentials } from '../../store/slices/authSlice';
+import Logo from '../common/Logo';
 
 export default function Sidebar() {
   const dispatch = useDispatch();
@@ -19,7 +20,6 @@ export default function Sidebar() {
       console.error(e);
     } finally {
       dispatch(clearCredentials());
-      // Explicitly redirect to login since axiosClient won't do it automatically anymore
       window.location.href = '/login';
     }
   };
@@ -32,14 +32,21 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className={`flex flex-col transition-all duration-300 bg-white border-r border-gray-200 ${sidebarOpen ? 'w-64' : 'w-20'}`}>
-      <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-        {sidebarOpen && <span className="text-xl font-bold text-primary-main truncate">QueryGenie</span>}
+    <aside className={`flex flex-col transition-all duration-300 bg-surface border-r border-border ${sidebarOpen ? 'w-64' : 'w-20'}`}>
+      <div className="flex items-center justify-between h-16 px-4 border-b border-border">
+        {sidebarOpen ? (
+          <Logo size="sm" showSubtitle={false} />
+        ) : (
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center mx-auto">
+            <Database className="w-4 h-4 text-white" />
+          </div>
+        )}
         <button 
           onClick={() => dispatch(toggleSidebar())}
-          className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500"
+          className="p-1.5 rounded-lg hover:bg-surface-secondary text-text-secondary transition-colors"
+          aria-label="Toggle sidebar"
         >
-          {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          {sidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
         </button>
       </div>
 
@@ -53,43 +60,43 @@ export default function Sidebar() {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                  `flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
                     isActive 
-                      ? 'bg-primary-main/10 text-primary-main' 
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-primary-subtle text-primary-main' 
+                      : 'text-text-secondary hover:bg-surface-secondary hover:text-text-primary'
                   }`
                 }
               >
-                <Icon size={20} className={sidebarOpen ? 'mr-3' : 'mx-auto'} />
+                <Icon size={18} className={sidebarOpen ? 'mr-3' : 'mx-auto'} />
                 {sidebarOpen && <span>{item.name}</span>}
               </NavLink>
             );
           })}
       </nav>
 
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-border">
         {sidebarOpen ? (
-          <div className="flex items-center mb-4 px-2">
-            <div className="w-8 h-8 rounded-full bg-primary-light text-white flex items-center justify-center font-bold">
+          <div className="flex items-center mb-3 px-2">
+            <div className="w-8 h-8 rounded-full bg-primary-main text-white flex items-center justify-center font-bold text-sm shadow-sm">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="ml-3 truncate">
-              <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user?.role}</p>
+              <p className="text-sm font-semibold text-text-primary truncate">{user?.name}</p>
+              <p className="text-xs text-text-secondary truncate">{user?.role}</p>
             </div>
           </div>
         ) : (
-          <div className="flex justify-center mb-4">
-             <div className="w-8 h-8 rounded-full bg-primary-light text-white flex items-center justify-center font-bold">
+          <div className="flex justify-center mb-3">
+             <div className="w-8 h-8 rounded-full bg-primary-main text-white flex items-center justify-center font-bold text-sm shadow-sm">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
           </div>
         )}
         <button
           onClick={handleLogout}
-          className={`flex items-center w-full px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors ${!sidebarOpen && 'justify-center'}`}
+          className={`flex items-center w-full px-3 py-2 text-sm font-semibold text-danger rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors ${!sidebarOpen && 'justify-center'}`}
         >
-          <LogOut size={20} className={sidebarOpen ? 'mr-3' : ''} />
+          <LogOut size={18} className={sidebarOpen ? 'mr-3' : ''} />
           {sidebarOpen && <span>Logout</span>}
         </button>
       </div>

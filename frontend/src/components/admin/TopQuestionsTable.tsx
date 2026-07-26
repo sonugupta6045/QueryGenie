@@ -11,33 +11,33 @@ export default function TopQuestionsTable() {
   
   if (!questions || questions.length === 0) {
     return (
-      <div className="text-center py-8 text-sm text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300 mt-4">
+      <div className="text-center py-8 text-sm text-text-secondary bg-surface-secondary rounded-lg border border-dashed border-border mt-4">
         No questions have been asked yet.
       </div>
     );
   }
 
   return (
-    <div className="mt-6 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-      <table className="min-w-full divide-y divide-gray-300">
-        <thead className="bg-gray-50">
+    <div className="mt-6 overflow-hidden shadow-sm border border-border md:rounded-lg">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-surface-secondary">
           <tr>
-            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-text-primary sm:pl-6">
               Question
             </th>
-            <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-text-primary">
               Count
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200 bg-white">
+        <tbody className="divide-y divide-border bg-surface">
           {questions.map((item, index) => (
-            <tr key={index}>
-              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6 flex items-center">
-                <MessageSquare size={16} className="text-gray-400 mr-2" />
+            <tr key={index} className="hover:bg-surface-secondary/50 transition-colors">
+              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-text-primary sm:pl-6 flex items-center">
+                <MessageSquare size={16} className="text-text-secondary mr-2" />
                 {item.question}
               </td>
-              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-right">
+              <td className="whitespace-nowrap px-3 py-4 text-sm text-text-secondary text-right font-medium">
                 {item.count}
               </td>
             </tr>

@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { RoleGuard } from '../components/common/RoleGuard';
 
 // Pages
+import LandingPage from '../pages/landing/LandingPage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ChatPage from '../pages/chat/ChatPage';
@@ -22,6 +23,9 @@ export default function AppRouter() {
 
   return (
     <Routes>
+      {/* Public Landing Page */}
+      <Route path="/" element={<LandingPage />} />
+
       {/* Public Auth Routes */}
       <Route 
         path="/login" 
@@ -31,10 +35,13 @@ export default function AppRouter() {
         path="/register" 
         element={isAuthenticated ? <Navigate to="/chat" replace /> : <RegisterPage />} 
       />
+      <Route 
+        path="/signup" 
+        element={isAuthenticated ? <Navigate to="/chat" replace /> : <RegisterPage />} 
+      />
 
       {/* Protected Routes inside AppShell */}
-      <Route path="/" element={<RoleGuard><AppShell /></RoleGuard>}>
-        <Route index element={<Navigate to="/chat" replace />} />
+      <Route element={<RoleGuard><AppShell /></RoleGuard>}>
         
         {/* Chat - most roles */}
         <Route 
