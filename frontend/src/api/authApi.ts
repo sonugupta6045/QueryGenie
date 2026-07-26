@@ -1,6 +1,6 @@
 import axiosClient from './axiosClient';
 import { ApiResponse } from '../types/apiResponse';
-import { AuthResponse, LoginRequest, RegisterRequest, RefreshTokenRequest } from '../types/auth';
+import { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth';
 
 export const authApi = {
   login: async (request: LoginRequest): Promise<AuthResponse> => {

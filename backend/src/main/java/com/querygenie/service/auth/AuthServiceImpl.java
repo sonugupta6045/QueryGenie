@@ -67,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = UnauthorizedException.class)
     public AuthResponse refresh(RefreshTokenRequest request) {
         if (request == null || request.getRefreshToken() == null || request.getRefreshToken().isBlank()) {
             throw new UnauthorizedException("Refresh token is missing");

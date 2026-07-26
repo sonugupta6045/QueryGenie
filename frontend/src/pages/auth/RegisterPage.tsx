@@ -38,8 +38,7 @@ export default function RegisterPage() {
         const data = await authApi.register(payload);
         dispatch(setCredentials({
           user: { id: data.userId, name: data.name, email: data.email, role: data.role },
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken
+          accessToken: data.accessToken
         }));
         navigate('/chat', { replace: true });
       } catch (err: any) {
