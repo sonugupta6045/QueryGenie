@@ -35,7 +35,7 @@ export default function Logo({ showSubtitle = true, size = 'md', className = '' 
       </div>
       <div className="flex flex-col text-left">
         <span
-          className={`${textSizes[size]} font-extrabold bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent tracking-tight`}
+          className={`${textSizes[size]} font-extrabold bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent tracking-tight`}
         >
           QueryGenie
         </span>
