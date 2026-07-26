@@ -1,28 +1,16 @@
 import { NavLink } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { MessageSquare, History, Database, Shield, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MessageSquare, History, Database, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RootState } from '../../store/store';
 import { toggleSidebar } from '../../store/slices/uiSlice';
 import { useAuth } from '../../hooks/useAuth';
-import { authApi } from '../../api/authApi';
-import { clearCredentials } from '../../store/slices/authSlice';
 import Logo from '../common/Logo';
+import UserProfileMenu from './UserProfileMenu';
 
 export default function Sidebar() {
   const dispatch = useDispatch();
   const { sidebarOpen } = useSelector((state: RootState) => state.ui);
-  const { role, user } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await authApi.logout();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      dispatch(clearCredentials());
-      window.location.href = '/login';
-    }
-  };
+  const { role } = useAuth();
 
   const menuItems = [
     { name: 'Chat', path: '/chat', icon: MessageSquare, roles: ['SUPER_ADMIN', 'DATA_SOURCE_ADMIN', 'ANALYST'] },
@@ -74,31 +62,8 @@ export default function Sidebar() {
           })}
       </nav>
 
-      <div className="p-4 border-t border-border">
-        {sidebarOpen ? (
-          <div className="flex items-center mb-3 px-2">
-            <div className="w-8 h-8 rounded-full bg-primary-main text-white flex items-center justify-center font-bold text-sm shadow-sm">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <div className="ml-3 truncate">
-              <p className="text-sm font-semibold text-text-primary truncate">{user?.name}</p>
-              <p className="text-xs text-text-secondary truncate">{user?.role}</p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center mb-3">
-             <div className="w-8 h-8 rounded-full bg-primary-main text-white flex items-center justify-center font-bold text-sm shadow-sm">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-          </div>
-        )}
-        <button
-          onClick={handleLogout}
-          className={`flex items-center w-full px-3 py-2 text-sm font-semibold text-danger rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors ${!sidebarOpen && 'justify-center'}`}
-        >
-          <LogOut size={18} className={sidebarOpen ? 'mr-3' : ''} />
-          {sidebarOpen && <span>Logout</span>}
-        </button>
+      <div className="p-3 border-t border-border">
+        <UserProfileMenu sidebarOpen={sidebarOpen} />
       </div>
     </aside>
   );
