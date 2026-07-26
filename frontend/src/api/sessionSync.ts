@@ -1,31 +1,79 @@
 import { store } from '../store/store';
-import { setSessionExpired } from '../store/slices/authSlice';
+import { setAccessToken, setSessionExpired } from '../store/slices/authSlice';
 
-// A single BroadcastChannel used by this tab
-const sessionChannel = new BroadcastChannel('session');
+export type SessionEventType = 'TOKEN_REFRESHED' | 'SESSION_EXPIRED' | 'SESSION_RESTORED';
 
-// Listen for messages from other tabs
-sessionChannel.onmessage = (event) => {
-  if (event.data === 'session-expired') {
-    // Another tab failed to refresh, mark this tab as expired
-    store.dispatch(setSessionExpired(true));
-  } else if (event.data === 'session-restored') {
-    // Another tab successfully re-authenticated, close the prompt in this tab
-    store.dispatch(setSessionExpired(false));
-    
-    // Silently fetch the newly issued token for this tab
-    import('./refreshQueue').then(({ getNewToken }) => {
-      getNewToken().catch(() => {
-        // Ignore errors, if it fails it will naturally dispatch session expired again
-      });
-    });
+export interface SessionSyncPayload {
+  type: SessionEventType;
+  accessToken?: string;
+  expiresAtMs?: number;
+  timestamp: number;
+}
+
+const CHANNEL_NAME = 'querygenie-session';
+
+let channel: BroadcastChannel | null = null;
+let lastReceivedToken: string | null = null;
+let lastReceivedTime: number = 0;
+
+export function initSessionSync() {
+  if (typeof window === 'undefined' || !('BroadcastChannel' in window)) {
+    return;
   }
-};
 
-export const broadcastSessionExpired = () => {
-  sessionChannel.postMessage('session-expired');
-};
+  if (!channel) {
+    channel = new BroadcastChannel(CHANNEL_NAME);
+    
+    channel.onmessage = (event: MessageEvent<SessionSyncPayload>) => {
+      const { type, accessToken, timestamp } = event.data;
 
-export const broadcastSessionRestored = () => {
-  sessionChannel.postMessage('session-restored');
-};
+      if (type === 'TOKEN_REFRESHED' && accessToken) {
+        lastReceivedToken = accessToken;
+        lastReceivedTime = timestamp;
+        store.dispatch(setAccessToken(accessToken));
+      } else if (type === 'SESSION_EXPIRED') {
+        store.dispatch(setSessionExpired(true));
+      } else if (type === 'SESSION_RESTORED' && accessToken) {
+        lastReceivedToken = accessToken;
+        lastReceivedTime = timestamp;
+        store.dispatch(setAccessToken(accessToken));
+      }
+    };
+  }
+}
+
+export function broadcastTokenRefreshed(accessToken: string, expiresAtMs?: number) {
+  const payload: SessionSyncPayload = {
+    type: 'TOKEN_REFRESHED',
+    accessToken,
+    expiresAtMs,
+    timestamp: Date.now(),
+  };
+  lastReceivedToken = accessToken;
+  lastReceivedTime = payload.timestamp;
+  channel?.postMessage(payload);
+}
+
+export function broadcastSessionExpired() {
+  channel?.postMessage({
+    type: 'SESSION_EXPIRED',
+    timestamp: Date.now(),
+  });
+}
+
+export function broadcastSessionRestored(accessToken: string) {
+  channel?.postMessage({
+    type: 'SESSION_RESTORED',
+    accessToken,
+    timestamp: Date.now(),
+  });
+}
+
+export function hasRecentBroadcastToken(): boolean {
+  // Returns true if another tab broadcast a token within the last 5 seconds
+  return !!lastReceivedToken && Date.now() - lastReceivedTime < 5000;
+}
+
+export function getRecentBroadcastToken(): string | null {
+  return hasRecentBroadcastToken() ? lastReceivedToken : null;
+}

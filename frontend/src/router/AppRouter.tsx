@@ -14,6 +14,7 @@ import QueryHistoryPage from '../pages/history/QueryHistoryPage';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
 import UsageAnalyticsPage from '../pages/admin/UsageAnalyticsPage';
 import UserManagementPage from '../pages/admin/UserManagementPage';
+import SessionsPage from '../pages/settings/SessionsPage';
 
 // Layout
 import AppShell from '../components/layout/AppShell';
@@ -114,6 +115,9 @@ export default function AppRouter() {
             </RoleGuard>
           } 
         />
+
+        {/* Sessions Settings - all logged in users */}
+        <Route path="settings/sessions" element={<SessionsPage />} />
       </Route>
 
       {/* Fallback */}

@@ -41,4 +41,16 @@ public class RefreshToken {
 
     @Column(name = "rotated_at")
     private Instant rotatedAt;
+
+    @Column(name = "user_agent", length = 512)
+    private String userAgent;
+
+    @Column(name = "ip_address", length = 45)
+    private String ipAddress;
+
+    @Column(name = "device_label", length = 255)
+    private String deviceLabel;
+
+    @Column(name = "last_used_at", nullable = false)
+    private Instant lastUsedAt;
 }

@@ -39,7 +39,7 @@ export default function LoginPage() {
 
         // Broadcast that session was restored to other tabs
         import('../../api/sessionSync').then((module) => {
-          module.broadcastSessionRestored();
+          module.broadcastSessionRestored(data.accessToken);
         });
 
         // Redirect to returnUrl if it exists, otherwise to /chat

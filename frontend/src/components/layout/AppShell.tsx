@@ -1,10 +1,22 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import DataSourceSelector from './DataSourceSelector';
 import SessionExpiredModal from '../auth/SessionExpiredModal';
+import IdleTimeoutModal from '../common/IdleTimeoutModal';
 import ThemeToggle from '../common/ThemeToggle';
+import { initSessionSync } from '../../api/sessionSync';
+import { scheduleProactiveRefresh } from '../../api/tokenScheduler';
+import { useIdleTimeout } from '../../hooks/useIdleTimeout';
 
 export default function AppShell() {
+  const { showWarning, remainingSeconds, stayLoggedIn, logoutNow } = useIdleTimeout();
+
+  useEffect(() => {
+    initSessionSync();
+    scheduleProactiveRefresh();
+  }, []);
+
   return (
     <>
       <div className="flex h-screen bg-bg overflow-hidden font-sans transition-colors duration-200">
@@ -27,6 +39,12 @@ export default function AppShell() {
         </div>
       </div>
       <SessionExpiredModal />
+      <IdleTimeoutModal
+        isOpen={showWarning}
+        remainingSeconds={remainingSeconds}
+        onStayLoggedIn={stayLoggedIn}
+        onLogoutNow={logoutNow}
+      />
     </>
   );
 }

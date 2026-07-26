@@ -1,6 +1,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useDispatch } from 'react-redux';
-import { User as UserIcon, LogOut, ChevronUp, Sun, Moon, ShieldCheck } from 'lucide-react';
+import { LogOut, ChevronUp, Sun, Moon, ShieldCheck, Laptop } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { authApi } from '../../api/authApi';
@@ -12,6 +13,7 @@ interface UserProfileMenuProps {
 
 export default function UserProfileMenu({ sidebarOpen }: UserProfileMenuProps) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, role } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -91,11 +93,11 @@ export default function UserProfileMenu({ sidebarOpen }: UserProfileMenuProps) {
 
           {/* Menu Actions */}
           <DropdownMenu.Item 
+            onClick={() => navigate('/settings/sessions')}
             className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-text-primary rounded-lg hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none cursor-pointer transition-colors"
-            onSelect={(e) => e.preventDefault()}
           >
-            <UserIcon size={15} className="text-text-secondary" />
-            <span>Profile & Preferences</span>
+            <Laptop size={15} className="text-text-secondary" />
+            <span>Manage Active Sessions</span>
           </DropdownMenu.Item>
 
           <DropdownMenu.Item 

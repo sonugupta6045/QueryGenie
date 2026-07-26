@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,6 +18,8 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     Optional<RefreshToken> findByTokenHashAndRevokedFalse(String tokenHash);
 
+    List<RefreshToken> findByUserAndRevokedFalse(User user);
+
     @Modifying
     @Query("UPDATE RefreshToken rt SET rt.revoked = true WHERE rt.user = :user")
     void revokeAllByUser(@Param("user") User user);
@@ -24,4 +27,8 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Modifying
     @Query("UPDATE RefreshToken rt SET rt.revoked = true WHERE rt.familyId = :familyId")
     void revokeAllByFamilyId(@Param("familyId") String familyId);
+
+    @Modifying
+    @Query("UPDATE RefreshToken rt SET rt.revoked = true WHERE rt.user = :user AND rt.familyId <> :currentFamilyId")
+    void revokeAllOtherSessions(@Param("user") User user, @Param("currentFamilyId") String currentFamilyId);
 }

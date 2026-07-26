@@ -1,8 +1,13 @@
 import axios from 'axios';
 import { store } from '../store/store';
 import { setAccessToken, setSessionExpired } from '../store/slices/authSlice';
-import { broadcastSessionExpired, broadcastSessionRestored } from './sessionSync';
-
+import {
+  broadcastSessionExpired,
+  broadcastTokenRefreshed,
+  hasRecentBroadcastToken,
+  getRecentBroadcastToken
+} from './sessionSync';
+import { scheduleProactiveRefresh } from './tokenScheduler';
 let isRefreshing = false;
 let failedQueue: { resolve: (token: string) => void; reject: (error: any) => void }[] = [];
 
@@ -18,6 +23,16 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 export const getNewToken = async (): Promise<string> => {
+  // If another tab recently broadcast a fresh token, return it immediately without calling network
+  if (hasRecentBroadcastToken()) {
+    const recentToken = getRecentBroadcastToken();
+    if (recentToken) {
+      store.dispatch(setAccessToken(recentToken));
+      scheduleProactiveRefresh();
+      return recentToken;
+    }
+  }
+
   if (isRefreshing) {
     return new Promise((resolve, reject) => {
       failedQueue.push({ resolve, reject });
@@ -27,15 +42,12 @@ export const getNewToken = async (): Promise<string> => {
   isRefreshing = true;
 
   try {
-    // Call the API to refresh the token. 
-    // Uses HttpOnly cookie, so no body parameters are needed.
     const res = await axios.post('/api/v1/auth/refresh', {}, { withCredentials: true });
-
-    // The response returns the new access token.
     const newAccessToken = res.data.data.accessToken;
 
     store.dispatch(setAccessToken(newAccessToken));
-    broadcastSessionRestored();
+    broadcastTokenRefreshed(newAccessToken);
+    scheduleProactiveRefresh();
 
     processQueue(null, newAccessToken);
     return newAccessToken;

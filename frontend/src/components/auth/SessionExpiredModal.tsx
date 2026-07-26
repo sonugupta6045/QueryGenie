@@ -44,7 +44,7 @@ const SessionExpiredModal: React.FC = () => {
         })
       );
       
-      broadcastSessionRestored();
+      broadcastSessionRestored(data.accessToken);
       
       // Clear password field
       setPassword('');
