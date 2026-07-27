@@ -4,6 +4,8 @@ server:
     context-path: /
 
 spring:
+  main:
+    lazy-initialization: true
   application:
     name: querygenie-backend
 
@@ -14,8 +16,9 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
-      ddl-auto: none # validate to supabase part could check it
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
